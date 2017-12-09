@@ -17,10 +17,17 @@ library(janitor)
 
 ```{r}
 gh = read_excel("./GHProject_Dataset.xlsx") %>% 
-     clean_names %>%
-     separate(admitdtm, c("dow","date","year"), ",") %>% 
-     mutate(date = trimws(date, "left")) %>% 
-     mutate(inlosday = log(losdays2))
+  clean_names %>% 
+  separate(admitdtm, c("dow","date","year"), ",") %>% 
+  mutate(date = trimws(date, "left")) %>% 
+  separate(date,c("month","sdate")," ") %>% 
+  mutate(month = as.numeric(match(month,month.name)),
+         sdate = as.numeric(sdate),
+         year = as.numeric(year),
+         date = paste(month, sdate, year, sep="-"),
+         date = as.Date(date, "%m-%d-%Y")) %>%
+  select(-c(sdate,year,month)) %>% 
+  mutate(log_losday = log(losdays2))
 ```
 
 ```{r}
