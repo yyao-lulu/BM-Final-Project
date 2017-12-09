@@ -32,7 +32,7 @@ gh = read_excel("./GHProject_Dataset.xlsx") %>%
   mutate(log_losday = log(losdays2))
 
 ### remove the duplicate visits
-gh = gh[order(gh$date),]
+gh = gh[order(gh$admit_date),]
 gh_unique <- gh[!duplicated(gh$patientid),]
 
 ### recode the levels of categorical variables
@@ -42,7 +42,22 @@ gh_tidy = gh_unique %>%
          is30dayreadmit = as.factor(is30dayreadmit),
          icu_flag = as.factor(icu_flag)) %>% 
   select(log_losday, losdays2, patientid, visitid, admit_date, admit_dow, everything(), -loshours, -facilityname, -facilityzip, -postalcode)
+
+gh_reg = gh_tidy %>%
+  select(-losdays2, patientid, visitid)
 ```
+
+```{r}
+#fit models
+model <- lm(gh_reg$log_losday~ ., data = gh_reg, na.rm = TRUE)
+
+model_forward <- ols_step_forward(model, penter = 0.20)
+model_backward <- ols_step_backward(model, penter = 0.20)
+```
+
+
+
+
 
 ```{r}
 #try transformation of the outcome
