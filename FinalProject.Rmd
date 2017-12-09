@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(janitor)
+library(xlsx)
 ```
 
 ```{r}
@@ -38,3 +39,12 @@ ggplot(aes(x = losdays2)) +  geom_histogram()
 gh %>%
 ggplot(aes(x = log(losdays2))) +  geom_histogram()
 ```
+
+```{r}
+
+gh = gh[order(gh$date),]
+gh_unique <- gh[!duplicated(gh$patientid),]
+
+
+```
+
