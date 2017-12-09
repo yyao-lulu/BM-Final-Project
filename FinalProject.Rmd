@@ -60,15 +60,15 @@ summary(reg_forward)
 model_stepwise <- ols_stepwise(model, pent = 0.20, prem = 0.20)
 model_stepwise$predictors
 
-stepwise_model1 <- lm(gh_tidy_2$log_losday ~ ageyear + evisit + bpsystolic + heartrate + respirationrate + is30dayreadmit + bpdiastolic + gender + temperature + admit_dow + race + religion + icu_flag + o2sat + maritalstatus + insurancetype + mews, data = gh_tidy_2) 
+stepwise_model1 <- lm(gh_reg$log_losday ~ ageyear + evisit + bpsystolic + heartrate + respirationrate + is30dayreadmit + bpdiastolic + gender + temperature + admit_dow + race + religion + icu_flag + o2sat + maritalstatus + insurancetype + mews, data = gh_reg ) 
 summary(stepwise_model1)
 
 #2
 step(model, direction = 'backward')
-stepwise_model2 <- lm(gh_tidy_2$log_losday ~ admit_date + admit_dow + is30dayreadmit + 
+stepwise_model2 <- lm(gh_reg$log_losday ~ admit_date + admit_dow + is30dayreadmit + 
     mews + cindex + evisit + icu_flag + ageyear + gender + maritalstatus + 
     insurancetype + bmi + bpsystolic + o2sat + temperature + 
-    heartrate + respirationrate + bpdiastolic, data = gh_tidy_2, na.rm = TRUE) 
+    heartrate + respirationrate + bpdiastolic, data = gh_reg, na.rm = TRUE) 
 summary(stepwise_model2 )
 ```
 
