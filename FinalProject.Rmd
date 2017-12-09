@@ -18,6 +18,8 @@ library(janitor)
 ```{r}
 gh = read_excel("./GHProject_Dataset.xlsx") %>% 
      clean_names %>%
+     separate(admitdtm, c("dow","date","year"), ",") %>% 
+     mutate(date = trimws(date, "left")) %>% 
      mutate(inlosday = log(losdays2))
 ```
 
