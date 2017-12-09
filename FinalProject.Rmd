@@ -17,6 +17,15 @@ library(janitor)
 
 ```{r}
 gh = read_excel("./GHProject_Dataset.xlsx") %>% 
-  clean_names
+     clean_names %>%
+     mutate(inlosday = log(losdays2))
 ```
 
+```{r}
+#try transformation of the outcome
+gh %>%
+ggplot(aes(x = losdays2)) +  geom_histogram()
+
+gh %>%
+ggplot(aes(x = log(losdays2))) +  geom_histogram()
+```
