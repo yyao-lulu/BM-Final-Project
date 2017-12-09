@@ -13,22 +13,35 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(janitor)
-library(xlsx)
+library(olsrr)
 ```
 
 ```{r}
+### clean the date
 gh = read_excel("./GHProject_Dataset.xlsx") %>% 
   clean_names %>% 
-  separate(admitdtm, c("dow","date","year"), ",") %>% 
+  separate(admitdtm, c("admit_dow","date","year"), ",") %>% 
   mutate(date = trimws(date, "left")) %>% 
   separate(date,c("month","sdate")," ") %>% 
   mutate(month = as.numeric(match(month,month.name)),
          sdate = as.numeric(sdate),
          year = as.numeric(year),
-         date = paste(month, sdate, year, sep="-"),
-         date = as.Date(date, "%m-%d-%Y")) %>%
+         admit_date = paste(month, sdate, year, sep="-"),
+         admit_date = as.Date(admit_date, "%m-%d-%Y")) %>%
   select(-c(sdate,year,month)) %>% 
   mutate(log_losday = log(losdays2))
+
+### remove the duplicate visits
+gh = gh[order(gh$date),]
+gh_unique <- gh[!duplicated(gh$patientid),]
+
+### recode the levels of categorical variables
+gh_tidy = gh_unique %>% 
+  mutate(mews = as.factor(ifelse(mews <= 1, "normal", ifelse(mews <= 3, "increase caution", ifelse(mews <= 5, "further desterioration", "immediate action required")))),
+         cindex = as.factor(ifelse(cindex == 0, "normal", ifelse(cindex <= 2, "mild", ifelse(cindex <= 4, "moderate", "severe")))),
+         is30dayreadmit = as.factor(is30dayreadmit),
+         icu_flag = as.factor(icu_flag)) %>% 
+  select(log_losday, losdays2, patientid, visitid, admit_date, admit_dow, everything(), -loshours, -facilityname, -facilityzip, -postalcode)
 ```
 
 ```{r}
@@ -40,11 +53,4 @@ gh %>%
 ggplot(aes(x = log(losdays2))) +  geom_histogram()
 ```
 
-```{r}
-
-gh = gh[order(gh$date),]
-gh_unique <- gh[!duplicated(gh$patientid),]
-
-
-```
 
