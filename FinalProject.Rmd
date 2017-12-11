@@ -51,6 +51,9 @@ gh_tidy = gh_unique %>%
 #Descriptive Statistics
 summary(gh_tidy)
 
+gh_tidy$gender[gh_tidy$gender == "Male"] = 0
+gh_tidy$gender[gh_tidy$gender == "Female"] = 1
+
 par(mfrow = c(1, 2))
 hist(gh_tidy$losdays2, main = "Length of Stay")
 hist(gh_tidy$log_losday, main = "Log Length of Stay")
@@ -78,28 +81,39 @@ hist(gh_tidy$bpdiastolic, main = "BP Diastolic") #80 -90 mmHg normal range
 hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
 hist(gh_tidy$temperature, main = "Temperature") #Normal range is 36.1 C - 37.2 C - check for outliers; can go upto 42C
 hist(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
-hist(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute
+hist(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
 
 
 gh_tidy$temperature[gh_tidy$temperature < 36] <- NA
 gh_tidy$temperature[gh_tidy$temperature > 42] <- NA
 gh_tidy$o2sat[gh_tidy$o2sat > 100] <- NA
 
+
 par(mfrow = c(1, 2))
 hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
 hist(gh_tidy$temperature, main = "Temperature")
 
+class(gh_tidy$gender) <- "binary"
+class(gh_tidy$icu_flag) <- "binary"
+class(gh_tidy$is30dayreadmit) <- "binary"
+
 ```
-
-
 
 ```{r}
 
 gh_reg = gh_tidy %>%
-  select(-losdays2, -patientid, -visitid)
+  select(-losdays2, -patientid, -visitid, -admit_date)
 
 #fit models
 model <- lm(gh_reg$log_losday~ ., data = gh_reg)
+summary(model)
+
+
+```
+
+
+```{r}
+
 
 model_forward <- ols_step_forward(model, penter = 0.20)
 model_backward <- ols_step_backward(model, penter = 0.20)
