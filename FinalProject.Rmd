@@ -16,7 +16,7 @@ library(janitor)
 library(olsrr)
 library(stringr)
 library(forcats)
-
+library(HH)
 ```
 
 ```{r}
@@ -104,7 +104,7 @@ class(gh_tidy$is30dayreadmit) <- "binary"
 
 ```{r}
 gh_reg = gh_tidy %>%
-  select(-losdays2, -patientid, -visitid, -admit_date, -bmi) %>%
+  select(log_losday:insurancetype, -losdays2, -patientid, -visitid, -admit_date) %>%
   na.omit() %>% 
   mutate(cindex = fct_relevel(cindex, "normal"),
          mews = fct_relevel(mews, "normal"))
@@ -117,53 +117,18 @@ summary(model)
 
 ```
 
-
-```{r}
-
-
-model_forward <- ols_step_forward(model, penter = 0.20)
-model_backward <- ols_step_backward(model, penter = 0.20)
-reg_forward<-lm(gh_reg$log_losday ~ ageyear + evisit + bpsystolic + heartrate + respirationrate + is30dayreadmit + bpdiastolic + gender + temperature + admit_dow, data = gh_reg)
-summary(reg_forward)
-
-#1
-model_stepwise <- ols_stepwise(model, pent = 0.20, prem = 0.20)
-model_stepwise$predictors
-
-stepwise_model1 <- lm(gh_reg$log_losday ~ ageyear + evisit + bpsystolic + heartrate + respirationrate + is30dayreadmit + bpdiastolic + gender + temperature + admit_dow + race + religion + icu_flag + o2sat + maritalstatus + insurancetype + mews, data = gh_reg ) 
-summary(stepwise_model1)
-
-#2
-step(model, direction = 'backward')
-stepwise_model2 <- lm(gh_reg$log_losday ~ admit_date + admit_dow + is30dayreadmit + 
-    mews + cindex + evisit + icu_flag + ageyear + gender + maritalstatus + 
-    insurancetype + bmi + bpsystolic + o2sat + temperature + 
-    heartrate + respirationrate + bpdiastolic, data = gh_reg, na.rm = TRUE) 
-summary(stepwise_model2 )
-```
-
 ```{r}
 #backward
-step(model, direction = 'backward')
-summary(lm(formula = gh_reg$log_losday ~ is30dayreadmit + cindex + evisit + 
-    ageyear + gender + maritalstatus + insurancetype + bpsystolic + 
-    o2sat + temperature + heartrate + respirationrate + bpdiastolic, 
-    data = gh_reg))
+backward = step(model, direction = 'backward')
+summary(lm(formula = log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data = gh_reg))
 
 #both 
-step(model, direction = 'both')
-summary(lm(formula = gh_reg$log_losday ~ is30dayreadmit + cindex + evisit + 
-    ageyear + gender + maritalstatus + insurancetype + bpsystolic + 
-    o2sat + temperature + heartrate + respirationrate + bpdiastolic, 
-    data = gh_reg))
+stepwise = step(model, direction = 'both')
+summary(lm(formula = log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data = gh_reg))
 
 #forward
-step(model, direction = 'forward')
-summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + 
-    mews + cindex + evisit + icu_flag + ageyear + gender + race + 
-    religion + maritalstatus + insurancetype + bpsystolic + o2sat + 
-    temperature + heartrate + respirationrate + bpdiastolic, 
-    data = gh_reg))
+forward = step(model, direction = 'forward')
+summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + mews + cindex + evisit + icu_flag + ageyear + gender + race + religion + maritalstatus + insurancetype, data = gh_reg))
 ```
 
 
@@ -172,13 +137,15 @@ summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit +
 
 best <- function(model, ...) 
 {
-  subsets <- regsubsets(formula(model), model.frame(model), ...)
+  subsets <- leaps::regsubsets(formula(model), model.frame(model), ...)
   subsets <- with(summary(subsets),
                   cbind(p = as.numeric(rownames(which)), which, rss, rsq, adjr2, cp, bic))
   
   return(subsets)
 }  
 
+best(backward, nbest=1)
+best(stepwise, nbest=1)
 ```
 
 
