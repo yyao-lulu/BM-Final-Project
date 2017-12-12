@@ -14,6 +14,9 @@ library(tidyverse)
 library(readxl)
 library(janitor)
 library(olsrr)
+library(stringr)
+library(forcats)
+
 ```
 
 ```{r}
@@ -102,7 +105,10 @@ class(gh_tidy$is30dayreadmit) <- "binary"
 ```{r}
 gh_reg = gh_tidy %>%
   select(-losdays2, -patientid, -visitid, -admit_date, -bmi) %>%
-  na.omit()
+  na.omit() %>% 
+  mutate(cindex = fct_relevel(cindex, "normal"),
+         mews = fct_relevel(mews, "normal"))
+
 
 #fit models
 model <- lm(gh_reg$log_losday~ ., data = gh_reg)
