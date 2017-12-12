@@ -100,9 +100,9 @@ class(gh_tidy$is30dayreadmit) <- "binary"
 ```
 
 ```{r}
-
 gh_reg = gh_tidy %>%
-  select(-losdays2, -patientid, -visitid, -admit_date)
+  select(-losdays2, -patientid, -visitid, -admit_date, -bmi) %>%
+  na.omit()
 
 #fit models
 model <- lm(gh_reg$log_losday~ ., data = gh_reg)
