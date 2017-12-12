@@ -136,8 +136,44 @@ stepwise_model2 <- lm(gh_reg$log_losday ~ admit_date + admit_dow + is30dayreadmi
 summary(stepwise_model2 )
 ```
 
+```{r}
+#backward
+step(model, direction = 'backward')
+summary(lm(formula = gh_reg$log_losday ~ is30dayreadmit + cindex + evisit + 
+    ageyear + gender + maritalstatus + insurancetype + bpsystolic + 
+    o2sat + temperature + heartrate + respirationrate + bpdiastolic, 
+    data = gh_reg))
+
+#both 
+step(model, direction = 'both')
+summary(lm(formula = gh_reg$log_losday ~ is30dayreadmit + cindex + evisit + 
+    ageyear + gender + maritalstatus + insurancetype + bpsystolic + 
+    o2sat + temperature + heartrate + respirationrate + bpdiastolic, 
+    data = gh_reg))
+
+#forward
+step(model, direction = 'forward')
+summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + 
+    mews + cindex + evisit + icu_flag + ageyear + gender + race + 
+    religion + maritalstatus + insurancetype + bpsystolic + o2sat + 
+    temperature + heartrate + respirationrate + bpdiastolic, 
+    data = gh_reg))
+```
 
 
+```{r}
+#best model
+
+best <- function(model, ...) 
+{
+  subsets <- regsubsets(formula(model), model.frame(model), ...)
+  subsets <- with(summary(subsets),
+                  cbind(p = as.numeric(rownames(which)), which, rss, rsq, adjr2, cp, bic))
+  
+  return(subsets)
+}  
+
+```
 
 
 ```{r}
