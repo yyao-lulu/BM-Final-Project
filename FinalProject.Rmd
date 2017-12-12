@@ -13,10 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(janitor)
-library(olsrr)
 library(stringr)
 library(forcats)
-library(HH)
+library(boot)
 ```
 
 ```{r}
@@ -45,8 +44,6 @@ gh_tidy = gh_unique %>%
          is30dayreadmit = as.factor(is30dayreadmit),
          icu_flag = as.factor(icu_flag)) %>% 
   select(log_losday, losdays2, patientid, visitid, admit_date, admit_dow, everything(), -loshours, -facilityname, -facilityzip, -postalcode)
-
-
 ```
 
 
@@ -113,11 +110,9 @@ gh_reg = gh_tidy %>%
 #fit models
 model <- lm(gh_reg$log_losday~ ., data = gh_reg)
 summary(model)
-
-
 ```
 
-```{r}
+```{r model_building}
 #backward
 backward = step(model, direction = 'backward')
 summary(lm(formula = log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data = gh_reg))
@@ -129,12 +124,8 @@ summary(lm(formula = log_losday ~ is30dayreadmit + mews + cindex + evisit + agey
 #forward
 forward = step(model, direction = 'forward')
 summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + mews + cindex + evisit + icu_flag + ageyear + gender + race + religion + maritalstatus + insurancetype, data = gh_reg))
-```
 
-
-```{r}
-#best model
-
+#criterion-based 
 best <- function(model, ...) 
 {
   subsets <- leaps::regsubsets(formula(model), model.frame(model), ...)
@@ -144,18 +135,16 @@ best <- function(model, ...)
   return(subsets)
 }  
 
-best(backward, nbest=1)
-best(stepwise, nbest=1)
+best(model, nbest=1)
+#is30dayreadmit1+mews immediate action required+cindex moderate+cindex severe+evisit+ageyear+maritalstatus single+insurancetype private
 ```
 
+```{r validation}
+#LOOCV
+glm.fit<-glm(log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data=gh_reg)
+cv.err<-cv.glm(gh_reg,glm.fit)
+cv.err$delta   
 
-```{r}
-#try transformation of the outcome
-gh %>%
-ggplot(aes(x = losdays2)) +  geom_histogram()
 
-gh %>%
-ggplot(aes(x = log(losdays2))) +  geom_histogram()
+
 ```
-
-
