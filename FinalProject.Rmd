@@ -49,8 +49,6 @@ gh_tidy = gh_unique %>%
 
 ### Descriptive Statistics
 ```{r}
-summary(gh_tidy)
-
 gh_tidy$gender[gh_tidy$gender == "Male"] = 0
 gh_tidy$gender[gh_tidy$gender == "Female"] = 1
 
@@ -165,8 +163,34 @@ class(gh_tidy$admit_dow) <- "binary"
 
 barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
 
-summary(gh_tidy)
 
+```
+
+```{r}
+summary_functn <- function(x){
+  list(variable = colnames(x),
+       minimum = apply(x, 2, min),
+       median = apply(x, 2, median),
+       mean = apply(x, 2, mean),
+       maximum = apply(x, 2, max),
+       sd = apply(x, 2, sd)) %>%
+    as.tibble()
+}
+
+gh_reg %>%
+select(log_losday,evisit,ageyear,bpsystolic,o2sat,temperature,heartrate,respirationrate,bpdiastolic) %>%
+summary_functn()
+
+gh_categorical = gh_reg %>%
+mutate(admit_dow=as.factor(admit_dow),
+is30dayreadmit=as.factor(is30dayreadmit),
+gender=as.factor(gender),
+race=as.factor(race),
+religion=as.factor(religion),
+maritalstatus=as.factor(maritalstatus),
+insurancetype=as.factor(insurancetype)) %>%
+select(admit_dow,is30dayreadmit,cindex,icu_flag,gender,race,religion,maritalstatus,insurancetype)
+summary(gh_categorical)
 ```
 
 ## Select the variables and fit the linear model
