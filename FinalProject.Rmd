@@ -184,7 +184,7 @@ model_icu0 <- lm(log_losday~ ., data = gh_reg_icu0)
 summary(model_icu0)
 anova(model_icu0)
 ```
-Deleted the variables in vital signs because of the potential multicolinearity, and deleted *bmi* due to the large number of NA.
+
 
 ```{r}
 summary_functn <- function(x){
@@ -216,7 +216,15 @@ summary(gh_categorical)
 ## Model fitting: Backward, Stepwise, and Forward
 ```{r}
 # forward
-forward = step(model, direction = 'forward')
+forward_icu0 = step(model_icu0, direction = 'forward')
+summary(forward_icu0)
+anova(forward_icu0)
+
+forward_icu1 = step(model_icu1, direction = 'forward')
+summary(forward_icu1)
+
+
+
 summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + mews + cindex + evisit + icu_flag + ageyear + gender + race + religion + maritalstatus + insurancetype, data = gh_reg))
 ```
 Forward keeps all of the original predictors, but most of them are not significant.
@@ -252,11 +260,22 @@ anova(step2)
 step3 <- update(step2, . ~ . -gender )
 anova(step3)
 summary(step3)
+```
 
-# both 
-stepwise = step(model, direction = 'both')
-summary(lm(formula = log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data = gh_reg))
 
+```{r}
+# For stepwise
+stepwise_icu0 = step(model_icu0, direction = 'both')
+summary(stepwise_icu0)
+anova(stepwise_icu0)
+
+stepwise_icu1 = step(model_icu1, direction = 'both')
+summary(stepwise_icu1)
+anova(stepwise_icu1)
+```
+
+
+```{r}
 # both and backward are same.
 #is30dayreadmit1+mews(*3)+cindex(*3)+evisit+ageyear+insurance(*2)
 ```
@@ -273,7 +292,7 @@ best <- function(model, ...)
   return(subsets)
 }  
 
-best(model, nbest=1)
+best(model_icu0, nbest=1)
 ```
 
 ## Model diagnosis
