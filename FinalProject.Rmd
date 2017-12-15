@@ -58,13 +58,13 @@ par(mfrow = c(1, 2))
 hist(gh_tidy$losdays2, main = "Length of Stay")
 hist(gh_tidy$log_losday, main = "Log Length of Stay")
 
-par(mfrow = c(1, 2))
+par(mfrow = c(2, 2))
 barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
 barplot(table(gh_tidy$is30dayreadmit), las = 1, main = "Is patient 30 day readmit?")
 barplot(table(gh_tidy$mews), las = 2, main = "Modified Early Warning Score (MEWS)")
 barplot(table(gh_tidy$cindex), las = 2, main = "Charlson comorbidity index (CCI)")
 
-
+par(mfrow = c(3, 2))
 barplot(table(gh_tidy$icu_flag), main = "If patient visited ICU")
 barplot(table(gh_tidy$gender), main = "Gender")
 barplot(table(gh_tidy$race), las =2, main = "Race Frequency")
@@ -148,7 +148,25 @@ boxplot(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
 boxplot(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
 
 
+
+##Late Weekday: Thursday - Sunday, 0
+##Early Weekday: Monday - Wednesday, 1
+
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Thursday"] <- 0
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Friday"] <- 0
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Saturday"] <- 0
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Sunday"] <- 0
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Monday"] <- 1
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Tuesday"] <- 1
+gh_tidy$admit_dow[gh_tidy$admit_dow == "Wednesday"] <- 1
+
+
+class(gh_tidy$admit_dow) <- "binary"
+
+barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
+
 summary(gh_tidy)
+
 ```
 
 ## Select the variables and fit the linear model
