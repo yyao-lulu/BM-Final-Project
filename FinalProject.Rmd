@@ -146,7 +146,6 @@ boxplot(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
 boxplot(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
 
 
-
 ##Late Weekday: Thursday - Sunday, 0
 ##Early Weekday: Monday - Wednesday, 1
 
@@ -273,6 +272,7 @@ best <- function(model, ...)
   
   return(subsets)
 }  
+
 best(model, nbest=1)
 ```
 
