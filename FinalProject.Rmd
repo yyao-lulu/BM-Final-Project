@@ -172,6 +172,9 @@ hist(gh_tidy$temperature, main = "Temperature") #Normal range is 36.1 C - 37.2 C
 hist(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
 hist(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
 
+gh_tidy$temperature[gh_tidy$temperature < 36] <- NA
+gh_tidy$temperature[gh_tidy$temperature > 42] <- NA
+gh_tidy$o2sat[gh_tidy$o2sat > 100] <- NA
 
 par(mfrow = c(1, 2))
 hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
