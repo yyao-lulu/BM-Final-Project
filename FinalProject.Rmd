@@ -40,14 +40,14 @@ gh_unique <- gh[!duplicated(gh$patientid),]
 
 ### recode the levels of categorical variables
 gh_tidy = gh_unique %>% 
-  mutate(mews = as.factor(ifelse(mews <= 1, "normal", ifelse(mews <= 3, "increase caution", ifelse(mews <= 5, "further deterioration", "immediate action required")))),
-         cindex = as.factor(ifelse(cindex == 0, "normal", ifelse(cindex <= 2, "mild", ifelse(cindex <= 4, "moderate", "severe")))),
+  mutate(cindex = as.factor(ifelse(cindex == 0, "normal", ifelse(cindex <= 2, "mild", ifelse(cindex <= 4, "moderate", "severe")))),
          is30dayreadmit = as.factor(is30dayreadmit),
          icu_flag = as.factor(icu_flag)) %>% 
   select(log_losday, losdays2, patientid, visitid, admit_date, admit_dow, everything(), -loshours, -facilityname, -facilityzip, -postalcode)
 ```
 
-#Descriptive Statistics
+
+### Descriptive Statistics
 ```{r}
 summary(gh_tidy)
 
@@ -123,7 +123,7 @@ hist(gh_tidy$temperature, main = "Temperature")
 ## Select the variables and fit the linear model
 ```{r}
 gh_reg = gh_tidy %>%
-  select(log_losday:insurancetype, -losdays2, -patientid, -visitid, -admit_date) %>%
+  select(-losdays2, -patientid, -visitid, -admit_date, -bmi, -mews) %>%
   na.omit() %>% 
   mutate(cindex = fct_relevel(cindex, "normal"),
          mews = fct_relevel(mews, "normal"))
