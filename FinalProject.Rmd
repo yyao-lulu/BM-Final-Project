@@ -94,7 +94,6 @@ best <- function(model, ...)
   
   return(subsets)
 }  
-
 best(model, nbest=1)
 ```
 
@@ -119,14 +118,18 @@ Delta value is the average mean-squared error. According to the lecture, the two
 
 ### Bootstrap
 ```{r bootstrap}
-gh_reg %>% 
-  modelr::bootstrap(n = 100) %>% 
-  mutate(models = map(strap, ~lm(gh_reg$log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data = .x)),
-         results = map(models, broom::tidy)) %>% 
-  select(-strap, -models) %>% 
-  unnest() %>% 
-  group_by(term) %>% 
-  summarize(boot_se = sd(estimate)) 
+set.seed(1)
+gh_reg_df = as.data.frame(gh_reg)
+attach(gh_reg_df)
+
+# Our usual regression, no bootstrap yet
+boot.fn<-function(data, index){
+	return(coef(lm(log_losday ~ is30dayreadmit + mews + cindex + evisit + ageyear + insurancetype, data=gh_reg_df,subset=index)))
+}
+
+# Use function boot() to repeat the sampling 10000 times.
+# Repeat 10000 times to get the estimates, SEs ad bias
+boot(gh_reg2, boot.fn, 100)
 ```
 The results are the standard errors for the estimated coefficient, and it should be around zero. Our results show that the se of all the predictors are quite small. 
 
@@ -175,8 +178,5 @@ hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outlier
 hist(gh_tidy$temperature, main = "Temperature")
 
 ```
-
-
-
 
 
