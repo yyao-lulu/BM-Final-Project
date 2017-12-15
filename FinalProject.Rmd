@@ -230,25 +230,26 @@ summary(lm(formula = gh_reg$log_losday ~ admit_dow + is30dayreadmit + mews + cin
 Forward keeps all of the original predictors, but most of them are not significant.
 
 ```{r model_building}
-# backward
 # for ICU_1
 model_icu1 <- lm(gh_reg_icu1$log_losday~ ., data = gh_reg_icu1)
 anova(model_icu1)
-step1 <- update(model_icu1 , . ~ . -bpsystolic)
+step1 <- update(model_icu1 , . ~ . -bpdiastolic)
 anova(step1)
-step2 <- update(step1, . ~ . -respirationrate)
+step2 <- update(step1, . ~ . -insurancetype)
 anova(step2)
 step3 <- update(step2, . ~ . -gender)
 anova(step3)
-step4 <- update(step3, . ~ . -bpdiastolic)
+step4 <- update(step3, . ~ . -bpsystolic )
 anova(step4)
-step5 <- update(step4, . ~ . -race)
+step5 <- update(step4, . ~ . -heartrate)
 anova(step5)
-step6 <- update(step5, . ~ . -religion)
+step6 <- update(step5, . ~ . -respirationrate)
 anova(step6)
-step7 <- update(step6, . ~ . -heartrate )
+step7 <- update(step6, . ~ . -race)
 anova(step7)
-summary(step7)
+step8 <- update(step7, . ~ . -religion)
+anova(step8)
+summary(step8)
 
 # for ICU_0
 model_icu0 <- lm(gh_reg_icu0$log_losday~ ., data = gh_reg_icu0)
