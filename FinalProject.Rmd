@@ -47,6 +47,78 @@ gh_tidy = gh_unique %>%
   select(log_losday, losdays2, patientid, visitid, admit_date, admit_dow, everything(), -loshours, -facilityname, -facilityzip, -postalcode)
 ```
 
+#Descriptive Statistics
+```{r}
+summary(gh_tidy)
+
+gh_tidy$gender[gh_tidy$gender == "Male"] = 0
+gh_tidy$gender[gh_tidy$gender == "Female"] = 1
+
+par(mfrow = c(1, 2))
+hist(gh_tidy$losdays2, main = "Length of Stay")
+hist(gh_tidy$log_losday, main = "Log Length of Stay")
+
+par(mfrow = c(1, 2))
+barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
+barplot(table(gh_tidy$is30dayreadmit), las = 1, main = "Is patient 30 day readmit?")
+barplot(table(gh_tidy$mews), las = 2, main = "Modified Early Warning Score (MEWS)")
+barplot(table(gh_tidy$cindex), las = 2, main = "Charlson comorbidity index (CCI)")
+
+
+barplot(table(gh_tidy$icu_flag), main = "If patient visited ICU")
+barplot(table(gh_tidy$gender), main = "Gender")
+barplot(table(gh_tidy$race), las =2, main = "Race Frequency")
+barplot(table(gh_tidy$religion), las = 2, main = "Religion Frequency")
+barplot(table(gh_tidy$maritalstatus), las = 2, main = "Marital Status Frequency")
+barplot(table(gh_tidy$insurancetype), las = 1, main = "Insurance Type")
+
+par(mfrow = c(3, 3))
+hist(gh_tidy$evisit, main = "ER visits in past 6 months")
+hist(gh_tidy$ageyear, main ="Age Histogram") #might need a log transformation
+hist(gh_tidy$bmi, main = "BMI")
+hist(gh_tidy$bpsystolic, main = "BP Systolic") #120 - 140 mmHg normal range
+hist(gh_tidy$bpdiastolic, main = "BP Diastolic") #80 -90 mmHg normal range
+hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
+hist(gh_tidy$temperature, main = "Temperature") #Normal range is 36.1 C - 37.2 C - check for outliers; can go upto 42C
+hist(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
+hist(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
+
+par(mfrow = c(3, 3))
+boxplot(gh_tidy$evisit, main = "ER visits in past 6 months")
+boxplot(gh_tidy$ageyear, main ="Age Histogram") #might need a log transformation
+boxplot(gh_tidy$bmi, main = "BMI")
+boxplot(gh_tidy$bpsystolic, main = "BP Systolic") #120 - 140 mmHg normal range
+boxplot(gh_tidy$bpdiastolic, main = "BP Diastolic") #80 -90 mmHg normal range
+boxplot(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
+boxplot(gh_tidy$temperature, main = "Temperature") #Normal range is 36.1 C - 37.2 C - check for outliers; can go upto 42C
+boxplot(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
+boxplot(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
+
+gh_tidy$temperature[gh_tidy$temperature < 36] <- NA
+gh_tidy$temperature[gh_tidy$temperature > 42] <- NA
+gh_tidy$o2sat[gh_tidy$o2sat > 100] <- NA
+
+#Based on Boxplot for Heart Rate, many outliers are identified. NA anything outside the minimum and maximum 1.5IQR
+#1.5IQR; if above 111.93 or below 46.89, remove from data set; This range is more realistic for an adult
+gh_tidy$heartrate[gh_tidy$heartrate < 46.89] <- NA
+gh_tidy$heartrate[gh_tidy$heartrate > 111.93] <- NA
+
+#Based on Boxplot for Respiration Rate, many outliers are identified. NA anything outside the minimum and maximum 1.5IQR
+#1.5IQR; if above 20.48 or below 15.085, remove from data set; This range is more realistic for an adult
+gh_tidy$respirationrate[gh_tidy$respirationrate < 15.085] <- NA
+gh_tidy$respirationrate[gh_tidy$respirationrate > 20.48] <- NA
+
+#Based on Boxplot for Respiration Rate, many outliers are identified. NA anything outside the minimum and maximum 1.5IQR
+#1.5IQR; if above 20.48 or below 15.085, remove from data set; This range is more realistic for an adult
+gh_tidy$bpdiastolic[gh_tidy$bpdiastolic < 15.085] <- NA
+gh_tidy$bpdiastolic[gh_tidy$bpdiastolic > 20.48] <- NA
+
+par(mfrow = c(1, 2))
+hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
+hist(gh_tidy$temperature, main = "Temperature")
+
+```
+
 
 ## Select the variables and fit the linear model
 ```{r}
@@ -129,57 +201,8 @@ boot.fn<-function(data, index){
 
 # Use function boot() to repeat the sampling 10000 times.
 # Repeat 10000 times to get the estimates, SEs ad bias
-boot(gh_reg2, boot.fn, 100)
+boot(gh_reg_df, boot.fn, 100)
 ```
 The results are the standard errors for the estimated coefficient, and it should be around zero. Our results show that the se of all the predictors are quite small. 
-
-
-
-## Descriptive Statistics
-```{r}
-#Descriptive Statistics
-summary(gh_tidy)
-
-gh_tidy$gender[gh_tidy$gender == "Male"] = 0
-gh_tidy$gender[gh_tidy$gender == "Female"] = 1
-
-par(mfrow = c(1, 2))
-hist(gh_tidy$losdays2, main = "Length of Stay")
-hist(gh_tidy$log_losday, main = "Log Length of Stay")
-
-par(mfrow = c(1, 2))
-barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
-barplot(table(gh_tidy$is30dayreadmit), las = 1, main = "Is patient 30 day readmit?")
-barplot(table(gh_tidy$mews), las = 2, main = "Modified Early Warning Score (MEWS)")
-barplot(table(gh_tidy$cindex), las = 2, main = "Charlson comorbidity index (CCI)")
-
-
-barplot(table(gh_tidy$icu_flag), main = "If patient visited ICU")
-barplot(table(gh_tidy$gender), main = "Gender")
-barplot(table(gh_tidy$race), las =2, main = "Race Frequency")
-barplot(table(gh_tidy$religion), las = 2, main = "Religion Frequency")
-barplot(table(gh_tidy$maritalstatus), las = 2, main = "Marital Status Frequency")
-barplot(table(gh_tidy$insurancetype), las = 1, main = "Insurance Type")
-
-par(mfrow = c(3, 3))
-hist(gh_tidy$evisit, main = "ER visits in past 6 months")
-hist(gh_tidy$ageyear, main ="Age Histogram") #might need a log transformation
-hist(gh_tidy$bmi, main = "BMI")
-hist(gh_tidy$bpsystolic, main = "BP Systolic") #120 - 140 mmHg normal range
-hist(gh_tidy$bpdiastolic, main = "BP Diastolic") #80 -90 mmHg normal range
-hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
-hist(gh_tidy$temperature, main = "Temperature") #Normal range is 36.1 C - 37.2 C - check for outliers; can go upto 42C
-hist(gh_tidy$heartrate, main = "Heart Rate") #40 - 100 beats per minute
-hist(gh_tidy$respirationrate, main = "Respiration Rate") #12 - 25 breaths per minute in normal adult
-
-gh_tidy$temperature[gh_tidy$temperature < 36] <- NA
-gh_tidy$temperature[gh_tidy$temperature > 42] <- NA
-gh_tidy$o2sat[gh_tidy$o2sat > 100] <- NA
-
-par(mfrow = c(1, 2))
-hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
-hist(gh_tidy$temperature, main = "Temperature")
-
-```
 
 
