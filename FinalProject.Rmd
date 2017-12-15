@@ -166,6 +166,27 @@ barplot(table(gh_tidy$admit_dow), las = 2, main = "Day of Week Frequency")
 
 ```
 
+## Select the variables and fit the linear model
+```{r}
+gh_reg = gh_tidy %>%
+  select(-losdays2, -patientid, -visitid, -admit_date, -bmi, -mews) %>%
+  na.omit() %>% 
+  mutate(cindex = fct_relevel(cindex, "normal")) 
+
+gh_reg_icu1 = gh_reg %>% filter(icu_flag == 1) %>% mutate(icu_flag = as.numeric(icu_flag))
+gh_reg_icu0 = gh_reg %>% filter(icu_flag == 0) %>% mutate(icu_flag = as.numeric(icu_flag))
+
+#fit models
+model_icu1 <- lm(gh_reg_icu1$log_losday~ ., data = gh_reg_icu1)
+summary(model_icu1)
+anova(model_icu1)
+
+model_icu0 <- lm(log_losday~ ., data = gh_reg_icu0)
+summary(model_icu0)
+anova(model_icu0)
+```
+Deleted the variables in vital signs because of the potential multicolinearity, and deleted *bmi* due to the large number of NA.
+
 ```{r}
 summary_functn <- function(x){
   list(variable = colnames(x),
@@ -192,27 +213,6 @@ insurancetype=as.factor(insurancetype)) %>%
 select(admit_dow,is30dayreadmit,cindex,icu_flag,gender,race,religion,maritalstatus,insurancetype)
 summary(gh_categorical)
 ```
-
-## Select the variables and fit the linear model
-```{r}
-gh_reg = gh_tidy %>%
-  select(-losdays2, -patientid, -visitid, -admit_date, -bmi, -mews) %>%
-  na.omit() %>% 
-  mutate(cindex = fct_relevel(cindex, "normal")) 
-
-gh_reg_icu1 = gh_reg %>% filter(icu_flag == 1) %>% mutate(icu_flag = as.numeric(icu_flag))
-gh_reg_icu0 = gh_reg %>% filter(icu_flag == 0) %>% mutate(icu_flag = as.numeric(icu_flag))
-
-#fit models
-model_icu1 <- lm(gh_reg_icu1$log_losday~ ., data = gh_reg_icu1)
-summary(model_icu1)
-anova(model_icu1)
-
-model_icu0 <- lm(log_losday~ ., data = gh_reg_icu0)
-summary(model_icu0)
-anova(model_icu0)
-```
-Deleted the variables in vital signs because of the potential multicolinearity, and deleted *bmi* due to the large number of NA.
 
 ## Model fitting: Backward, Stepwise, and Forward
 ```{r}
