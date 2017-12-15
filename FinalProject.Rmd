@@ -110,8 +110,8 @@ gh_tidy$respirationrate[gh_tidy$respirationrate > 20.48] <- NA
 
 #Based on Boxplot for Respiration Rate, many outliers are identified. NA anything outside the minimum and maximum 1.5IQR
 #1.5IQR; if above 20.48 or below 15.085, remove from data set; This range is more realistic for an adult
-gh_tidy$bpdiastolic[gh_tidy$bpdiastolic < 15.085] <- NA
-gh_tidy$bpdiastolic[gh_tidy$bpdiastolic > 20.48] <- NA
+##gh_tidy$bpdiastolic[gh_tidy$bpdiastolic < 15.085] <- NA
+##gh_tidy$bpdiastolic[gh_tidy$bpdiastolic > 20.48] <- NA
 
 par(mfrow = c(1, 2))
 hist(gh_tidy$o2sat, main = "O2 Saturation") #Normal is  <100 - check for outliers
